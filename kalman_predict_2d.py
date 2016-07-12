@@ -145,15 +145,15 @@ def kalman_filter(x, P):
     for n in range(len(measurements)):
         
         # measurement update
-        Y = matrix([[measurements[n]]]) - H * x
-        S = (H * P) * H.transpose() + R
-        K = (P * H.transpose() * S.inverse())
-        x = x + (K * Y)
-        P = (I - (K*H)) * P
+        Y = matrix([[measurements[n]]]) - H * x 
+        S = (H * P) * H.transpose() + R #state transition matrix
+        K = (P * H.transpose() * S.inverse()) 
+        x = x + (K * Y) #update position and velocity from measurement
+        P = (I - (K*H)) * P #update uncertainty
         
         # prediction
-        x = (F * x) + u
-        P = F * P * F.transpose()
+        x = (F * x) + u #predict next position and velocity
+        P = F * P * F.transpose() #predict next uncertainty
     return x,P
 
 ############################################
