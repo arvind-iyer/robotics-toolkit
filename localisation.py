@@ -30,30 +30,35 @@
 # 1) first makes a movement,
 # 2) then takes a measurement.
 
+
 def localize(colors,measurements,motions,sensor_right,p_move):
     # initializes p to a uniform distribution over a grid of the same dimensions as colors
     pinit = 1.0 / float(len(colors)) / float(len(colors[0]))
     p = [[pinit for row in range(len(colors[0]))] for col in range(len(colors))]
+    
+    # compute probabilities after movements and measurements
+    for i in range(len(measurements)):
+        p = move(p, colors, motions[i])
+        p = sense(p, colors, measurements[i])
+    
     return p
-def init():
-    pinit = 1.0 / float(len(colors)) / float(len(colors[0]))
-    q = [[pinit for row in range(len(colors[0]))] for col in range(len(colors))]
-    return q
-def move(p, Z):
+
+def move(p, colors,  motion):
     q = []
     x = len(colors)
     y = len(colors[0])
     for i in range(x):
         q.append([])
         for j in range(y):
-            q[i].append( p[(i-Z[0])%x][(j-Z[1])%y]*p_move + p[i][j]*(1-p_move) )
+            q[i].append( p[(i-motion[0])%x][(j-motion[1])%y]*p_move + p[i][j]*(1-p_move) )
     return q
-def sense(p, U):
+
+def sense(p, colors, measurement):
     q = []
     for i in range(len(colors)):
         q.append([])
         for j in range(len(colors[0])):
-            hit = ( U == colors[i][j] )
+            hit = ( measurement == colors[i][j] )
             q[i].append( p[i][j]*(hit*sensor_right + (1-hit)*(1-sensor_right) ) )
     s = 0 
     for i in range(len(colors)):
@@ -63,6 +68,7 @@ def sense(p, U):
         for j in range(len(colors[0])):
             q[i][j] = q[i][j]/s
     return q
+    
 def show(p):
     rows = ['[' + ','.join(map(lambda x: '{0:.5f}'.format(x),r)) + ']' for r in p]
     print '[' + ',\n '.join(rows) + ']'
@@ -81,12 +87,8 @@ colors = [['R','G','G','R','R'],
           ['R','R','R','R','R']]
 measurements = ['G','G','G','G','G']
 motions = [[0,0],[0,1],[1,0],[1,0],[0,1]]
+
 sensor_right = 0.7
 p_move = 0.8
-#p = localize(colors,measurements,motions,sensor_right,p_move)
-p = init()
-for i in range(len(measurements)):
-    p = move(p,motions[i])
-    p = sense(p,measurements[i])
-    
-show(p) # displays your answer
+p = localize(colors,measurements,motions,sensor_right,p_move)
+show(p) #displays answer    
